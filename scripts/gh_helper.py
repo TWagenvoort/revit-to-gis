@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 import logging
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -36,24 +37,25 @@ class GrassholperDataHelper:
             # Try to find data directory relative to script location
             try:
                 script_dir = Path(__file__).parent.parent
-                data_dir = script_dir / "data"
+                data_dir = str(script_dir / "data")
             except:
                 # Fallback for Grasshopper where __file__ might not work
-                data_dir = Path.home() / "Desktop" / "Revit to GIS" / "data"
-        elif isinstance(data_dir, str):
-            data_dir = Path(data_dir)
+                data_dir = os.path.join(os.path.expanduser("~"), "Desktop", "Revit to GIS", "data")
+        elif isinstance(data_dir, Path):
+            data_dir = str(data_dir)
         
-        self.data_dir = Path(data_dir)
-        self.gh_input_dir = self.data_dir / "gh_inputs"
-        self.gh_output_dir = self.data_dir / "gh_outputs"
+        # Convert to string for compatibility with Grasshopper
+        self.data_dir = str(data_dir)
+        self.gh_input_dir = os.path.join(self.data_dir, "gh_inputs")
+        self.gh_output_dir = os.path.join(self.data_dir, "gh_outputs")
         
         # Create directories if needed
         try:
-            self.gh_input_dir.mkdir(parents=True, exist_ok=True)
-            self.gh_output_dir.mkdir(parents=True, exist_ok=True)
+            os.makedirs(self.gh_input_dir, exist_ok=True)
+            os.makedirs(self.gh_output_dir, exist_ok=True)
         except Exception as e:
-            logger.warning(f"Could not create directories: {e}")
-            logger.warning(f"Data dir: {self.data_dir}")
+            logger.warning("Could not create directories: {}".format(e))
+            logger.warning("Data dir: {}".format(self.data_dir))
         
         self.current_input_file = None
         self.current_data = []
@@ -71,34 +73,36 @@ class GrassholperDataHelper:
         
         try:
             if filename:
-                filepath = self.gh_input_dir / filename
+                filepath = os.path.join(self.gh_input_dir, filename)
             else:
                 # Find latest input file
-                input_files = list(self.gh_input_dir.glob("gh_input_*.json"))
+                import glob
+                pattern = os.path.join(self.gh_input_dir, "gh_input_*.json")
+                input_files = glob.glob(pattern)
                 if not input_files:
                     logger.warning("No input files found in gh_inputs/")
                     return []
                 
-                filepath = max(input_files, key=lambda p: p.stat().st_mtime)
+                filepath = max(input_files, key=lambda p: os.path.getmtime(p))
             
-            if not filepath.exists():
-                logger.error(f"Input file not found: {filepath}")
+            if not os.path.exists(filepath):
+                logger.error("Input file not found: {}".format(filepath))
                 return []
             
             with open(filepath, 'r') as f:
                 self.current_data = json.load(f)
             
             self.current_input_file = filepath
-            logger.info(f"✅ Loaded {len(self.current_data)} objects from {filepath.name}")
+            logger.info("Loaded {} objects from {}".format(len(self.current_data), os.path.basename(filepath)))
             
             return self.current_data
         
         except Exception as e:
-            logger.error(f"Error loading input data: {e}")
+            logger.error("Error loading input data: {}".format(e))
             return []
     
     def save_output_data(self, modified_data: List[Dict[str, Any]], 
-                        filename: Optional[str] = None) -> Path:
+                        filename: Optional[str] = None) -> str:
         """
         Save modified data for AGOL export
         
@@ -107,23 +111,23 @@ class GrassholperDataHelper:
             filename: Custom filename. If None, auto-generates.
         
         Returns:
-            Path to saved file
+            Path to saved file (as string)
         """
         
         try:
             if filename is None:
-                filename = f"gh_output_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+                filename = "gh_output_{}.json".format(datetime.now().strftime('%Y%m%d_%H%M%S'))
             
-            filepath = self.gh_output_dir / filename
+            filepath = os.path.join(self.gh_output_dir, filename)
             
             with open(filepath, 'w') as f:
                 json.dump(modified_data, f, indent=2)
             
-            logger.info(f"✅ Saved {len(modified_data)} modified objects to {filepath.name}")
+            logger.info("Saved {} modified objects to {}".format(len(modified_data), os.path.basename(filepath)))
             return filepath
         
         except Exception as e:
-            logger.error(f"Error saving output data: {e}")
+            logger.error("Error saving output data: {}".format(e))
             return None
     
     def get_object_by_id(self, obj_id: str) -> Optional[Dict[str, Any]]:
