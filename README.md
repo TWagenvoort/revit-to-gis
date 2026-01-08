@@ -1,4 +1,4 @@
-# Revit ↔ Grasshopper ↔ ArcGIS Online Integration Guide
+# Revit ↔ Grasshopper ↔ ArcGIS Online Integration Guide (made with AI, please dont use this directory unless prompted)
 
 ## 🎯 Overview
 
