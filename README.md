@@ -1,4 +1,23 @@
-# Revit ↔ Grasshopper ↔ ArcGIS Online Integration Guide (made with AI, please dont use this directory unless prompted)
+# Revit ↔ Grasshopper ↔ ArcGIS Online Integration
+
+> Bidirectional sync pipeline: Load from Revit → Modify in Grasshopper → Export to ArcGIS Online
+
+## 🚀 Quick Start
+
+**→ [GRASSHOPPER_SETUP_GUIDE.md](GRASSHOPPER_SETUP_GUIDE.md)** ← Start here for step-by-step setup!
+
+Or copy this into Grasshopper Python component:
+
+```python
+import urllib.request
+exec(urllib.request.urlopen("https://raw.githubusercontent.com/TWagenvoort/revit-to-gis/main/scripts/github_loader.py").read().decode('utf-8'))
+gh_helper = load_github_module_simple('gh_helper')
+helper = gh_helper.GrassholperDataHelper()
+objects = helper.load_input_data()
+print("Loaded {} objects".format(len(objects)))
+```
+
+---
 
 ## 🎯 Overview
 
@@ -11,7 +30,18 @@ Revit → SyncEngine → Grasshopper → ArcGIS Online
 
 ---
 
-## 📦 Componenten
+## � Documentation
+
+- **[GRASSHOPPER_SETUP_GUIDE.md](GRASSHOPPER_SETUP_GUIDE.md)** ← **START HERE!** Complete step-by-step guide for Grasshopper
+- **[docs/GITHUB_QUICKSTART.md](docs/GITHUB_QUICKSTART.md)** - Copy-paste ready code
+- **[docs/GH_GITHUB_SETUP.md](docs/GH_GITHUB_SETUP.md)** - Setup options (GitHub direct, pip, local)
+- **[docs/GH_TEMPLATES_GITHUB.md](docs/GH_TEMPLATES_GITHUB.md)** - Code templates and examples
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - System design and data flow
+- **[docs/](docs/)** - All other documentation files
+
+---
+
+## �📦 Componenten
 
 ### 1. **merge_engine.py** - Core Sync Engine
 - **Doel**: Centraal versie- en conflict management
