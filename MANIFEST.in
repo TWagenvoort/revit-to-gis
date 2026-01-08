@@ -1,0 +1,6 @@
+include README.md
+include requirements.txt
+include .gitignore
+recursive-include scripts *.py
+recursive-include data *.json
+recursive-include . *.md
