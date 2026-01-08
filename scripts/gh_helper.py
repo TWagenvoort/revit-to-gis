@@ -4,7 +4,7 @@ Import/Export data from/to Grasshopper in Python
 Can be used with IronPython in Grasshopper or as standalone script
 
 Usage in Grasshopper:
-    1. Import this module: import sys; sys.path.append(r'C:\path\to\scripts')
+    1. Import this module: import sys; sys.path.append('C:\\path\\to\\scripts')
     2. Create GHHelper instance: helper = GHHelper()
     3. Load data: gh_data = helper.load_input_data()
     4. Process geometry...
@@ -31,7 +31,7 @@ class GrassholperDataHelper:
         
         Args:
             data_dir: Path to data directory. If None, assumes relative path.
-                     Can also be a string like r"C:\Users\...\data"
+                     Can also be a string like C:\\Users\\...\\data
         """
         if data_dir is None:
             # Try to find data directory relative to script location
