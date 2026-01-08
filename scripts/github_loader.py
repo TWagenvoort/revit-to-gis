@@ -12,7 +12,6 @@ Usage:
 import sys
 import urllib.request
 import importlib.util
-from pathlib import Path
 
 # GitHub repository information
 GITHUB_REPO = "TWagenvoort/revit-to-gis"
@@ -41,25 +40,24 @@ def load_module_from_github(module_name):
     try:
         print(f"Loading from GitHub: {url}")
         
+        # IMPORTANT: Clear cached version to force fresh download
+        if module_name in sys.modules:
+            del sys.modules[module_name]
+        
         # Download the file
         response = urllib.request.urlopen(url)
         code = response.read().decode('utf-8')
         
-        # Create module spec
-        spec = importlib.util.spec_from_loader(
-            module_name,
-            loader=importlib.util.module_from_spec(spec := importlib.util.spec_from_loader(module_name, loader=None))
-        )
-        
-        # Execute code in module namespace
+        # Create and execute module
         module = importlib.util.module_from_spec(
             importlib.util.spec_from_loader(module_name, loader=None)
         )
+        module.__file__ = url
         exec(code, module.__dict__)
         
         sys.modules[module_name] = module
         
-        print(f"✅ Loaded {module_name} from GitHub")
+        print(f"✅ Loaded {module_name} from GitHub (fresh)")
         return module
         
     except Exception as e:
@@ -124,24 +122,31 @@ def load_all_from_github():
     return modules
 
 
-# Simpler version using direct exec
+# Simpler version using direct exec - FORCE FRESH DOWNLOAD
 def load_github_module_simple(module_name):
     """
-    Simplified loader using exec
+    Simplified loader using exec - ALWAYS downloads fresh from GitHub
     
     Usage:
         gh_helper = load_github_module_simple('gh_helper')
-        helper = gh_helper.GrassholperDataHelper()
+        helper = gh_helper.GrassholperDataHelper(data_dir=r"C:\path\to\data")
     """
     
     url = f"{SCRIPTS_URL}/{module_name}.py"
     
     try:
-        print(f"⬇️  Loading {module_name} from GitHub...")
+        print(f"⬇️  Loading {module_name} from GitHub (force fresh)...")
         
-        # Download and execute
+        # IMPORTANT: Clear any cached version to ensure fresh download
+        if module_name in sys.modules:
+            print(f"   Clearing cached {module_name}...")
+            del sys.modules[module_name]
+        
+        # Download and execute - always fresh
         with urllib.request.urlopen(url) as response:
             code = response.read().decode('utf-8')
+        
+        print(f"   Downloaded {len(code)} bytes")
         
         # Create a module
         module = type(sys)('module')
@@ -151,14 +156,16 @@ def load_github_module_simple(module_name):
         # Execute code in module namespace
         exec(code, module.__dict__)
         
-        # Register in sys.modules
+        # Register in sys.modules (overwrites any cached version)
         sys.modules[module_name] = module
         
-        print(f"✅ {module_name} loaded from GitHub")
+        print(f"✅ {module_name} loaded from GitHub (fresh)")
         return module
         
     except Exception as e:
         print(f"❌ Error: {e}")
+        import traceback
+        traceback.print_exc()
         raise
 
 
