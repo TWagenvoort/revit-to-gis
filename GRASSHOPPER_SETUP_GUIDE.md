@@ -80,7 +80,10 @@ url = "https://raw.githubusercontent.com/TWagenvoort/revit-to-gis/main/scripts/g
 exec(urllib.request.urlopen(url).read().decode('utf-8'))
 
 gh_helper = load_github_module_simple('gh_helper')
-helper = gh_helper.GrassholperDataHelper()
+
+# IMPORTANT: Specify data directory for Grasshopper
+data_dir = r"C:\Users\Thijs W\Desktop\Revit to GIS\data"
+helper = gh_helper.GrassholperDataHelper(data_dir=data_dir)
 
 try:
     objects = helper.load_input_data()
@@ -235,7 +238,10 @@ url = "https://raw.githubusercontent.com/TWagenvoort/revit-to-gis/main/scripts/g
 exec(urllib.request.urlopen(url).read().decode('utf-8'))
 
 gh_helper = load_github_module_simple('gh_helper')
-helper = gh_helper.GrassholperDataHelper()
+
+# IMPORTANT: Specify data directory
+data_dir = r"C:\Users\Thijs W\Desktop\Revit to GIS\data"
+helper = gh_helper.GrassholperDataHelper(data_dir=data_dir)
 
 if auto_save or 'auto_save' not in dir():
     try:

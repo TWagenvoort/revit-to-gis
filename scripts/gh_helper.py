@@ -30,19 +30,30 @@ class GrassholperDataHelper:
         
         Args:
             data_dir: Path to data directory. If None, assumes relative path.
+                     Can also be a string like r"C:\Users\...\data"
         """
         if data_dir is None:
             # Try to find data directory relative to script location
-            script_dir = Path(__file__).parent.parent
-            data_dir = script_dir / "data"
+            try:
+                script_dir = Path(__file__).parent.parent
+                data_dir = script_dir / "data"
+            except:
+                # Fallback for Grasshopper where __file__ might not work
+                data_dir = Path.home() / "Desktop" / "Revit to GIS" / "data"
+        elif isinstance(data_dir, str):
+            data_dir = Path(data_dir)
         
-        self.data_dir = data_dir
-        self.gh_input_dir = data_dir / "gh_inputs"
-        self.gh_output_dir = data_dir / "gh_outputs"
+        self.data_dir = Path(data_dir)
+        self.gh_input_dir = self.data_dir / "gh_inputs"
+        self.gh_output_dir = self.data_dir / "gh_outputs"
         
         # Create directories if needed
-        self.gh_input_dir.mkdir(parents=True, exist_ok=True)
-        self.gh_output_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            self.gh_input_dir.mkdir(parents=True, exist_ok=True)
+            self.gh_output_dir.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            logger.warning(f"Could not create directories: {e}")
+            logger.warning(f"Data dir: {self.data_dir}")
         
         self.current_input_file = None
         self.current_data = []
