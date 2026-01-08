@@ -67,7 +67,32 @@ if __name__ == "__main__":
 
 **Choose ONE option:**
 
-**Option A: GitHub (Recommended)**
+**Option A: GitHub Direct (No Installation!)**
+```python
+"""Grasshopper Python Component - Load Revit Data"""
+
+import urllib.request
+
+# Load from GitHub
+url = "https://raw.githubusercontent.com/TWagenvoort/revit-to-gis/main/scripts/github_loader.py"
+exec(urllib.request.urlopen(url).read().decode('utf-8'))
+
+gh_helper = load_github_module_simple('gh_helper')
+
+try:
+    helper = gh_helper.GrassholperDataHelper()
+    objects = helper.load_input_data()
+    count = len(objects) if objects else 0
+    
+    print("✅ Loaded {} objects from GitHub".format(count))
+    
+except Exception as e:
+    print("❌ Error: {}".format(e))
+    objects = None
+    count = 0
+```
+
+**Option B: pip install**
 ```python
 """Grasshopper Python Component - Load Revit Data"""
 
